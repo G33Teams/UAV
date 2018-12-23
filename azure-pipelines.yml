@@ -5,7 +5,7 @@
 
 trigger:
 - master
-
+- dev
 pool:
   vmImage: 'macOS-10.13'
 

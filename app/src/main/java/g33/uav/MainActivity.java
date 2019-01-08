@@ -16,6 +16,7 @@ import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -30,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
     /**无人机链接状态*/
     public boolean isOnline=false;
     public boolean isRock=false;
+    /**无人机操控控制*/
+    private SeekBar throttleControl;    //油门控制
 
     public void initdata(){
         data[0]=(byte) 0xAA;   //协议固定数据
@@ -92,7 +95,8 @@ public class MainActivity extends AppCompatActivity {
             //第三步：在线程里实现蓝牙通信
             //3.1  获取蓝牙设备
             BluetoothAdapter adpter=BluetoothAdapter.getDefaultAdapter();
-            BluetoothDevice device=adpter.getRemoteDevice("00:0E:0E:0E:30:F3");  //蓝牙地址
+            BluetoothDevice device=adpter.getRemoteDevice("00:0E:0E:15:84:EE");  //蓝牙地址
+            //BluetoothDevice device=adpter.getRemoteDevice("00:0E:0E:0E:30:F3");  //蓝牙地址
             //BluetoothDevice device=adpter.getRemoteDevice("00:0E:0E:15:84:F5");  //蓝牙地址
             //3.2 连接服务端
             UUID uuid=UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -193,6 +197,7 @@ public class MainActivity extends AppCompatActivity {
             isOnline=true;
             Thread t=new Thread(new SendThread());
             t.start();
+            seekBar_throttleControl();
         }
     }
 
@@ -203,4 +208,32 @@ public class MainActivity extends AppCompatActivity {
 //        btnC.setText("恢复");
     }
 
+    /**拖动控制油门*/
+    public void seekBar_throttleControl(){
+        if(isRock) {
+            throttleControl = (SeekBar) findViewById(R.id.seekBar);
+            throttleControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+                //拖动条改变时
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    int speed = progress * 20;
+                    data[3] = (byte) (speed >> 8); // 设置油门的高八位
+                    data[4] = (byte) (speed & 0xff);// 设置油门的低八位
+                }
+
+                //拖动开始
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                //拖动停止
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+
+                }
+            });
+        }
+    }
 }

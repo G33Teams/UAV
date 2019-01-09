@@ -51,6 +51,12 @@ public class MainActivity extends AppCompatActivity {
     /**摇杆是否复位*/
     public boolean isFinish_yaogan=true;
 
+    /**自定义样式*/
+    private CircleProgressView circle_progress_left,circle_progress_center,circle_progress_right;
+    private TextView tv_progress_left,tv_progress_center,tv_progress_right;
+
+
+
     /**界面控件初始化*/
     public void initElements(){
         btnConnect=(Button)findViewById(R.id.btn_connect);
@@ -71,8 +77,46 @@ public class MainActivity extends AppCompatActivity {
         tvshowFuYang.setText("俯仰值："+x910);
 
          initrokerview();
+        initCircleProgress();
 //        Thread t=new Thread(new ThreadTrokerview());
 //        t.start();
+    }
+
+    public void initCircleProgress(){
+        circle_progress_left = (CircleProgressView) findViewById(R.id.circle_progress_left);
+        circle_progress_center = (CircleProgressView) findViewById(R.id.circle_progress_center);
+        circle_progress_right = (CircleProgressView) findViewById(R.id.circle_progress_right);
+        tv_progress_left = (TextView) findViewById(R.id.tv_progress_left);
+        tv_progress_center = (TextView) findViewById(R.id.tv_progress_center);
+        tv_progress_right = (TextView) findViewById(R.id.tv_progress_right);
+
+
+        //开锁执行动画效果
+        circle_progress_left.startAnimProgress(1500, 0);
+        circle_progress_center.startAnimProgress(500, 0);
+        circle_progress_right.startAnimProgress(250, 0);
+        //监听进度条进度
+        circle_progress_left.setOnAnimProgressListener(new CircleProgressView.OnAnimProgressListener() {
+            @Override
+            public void valueUpdate(int progress) {
+                progress=x56;
+                tv_progress_left.setText(String.valueOf(progress));
+            }
+        });
+        circle_progress_center.setOnAnimProgressListener(new CircleProgressView.OnAnimProgressListener() {
+            @Override
+            public void valueUpdate(int progress) {
+                progress=x78;
+                tv_progress_center.setText(String.valueOf(progress));
+            }
+        });
+        circle_progress_right.setOnAnimProgressListener(new CircleProgressView.OnAnimProgressListener() {
+            @Override
+            public void valueUpdate(int progress) {
+                progress=x910;
+                tv_progress_right.setText(String.valueOf(progress));
+            }
+        });
     }
 
     public void initData(){
@@ -443,12 +487,12 @@ public class MainActivity extends AppCompatActivity {
                 }else if (direction == RockerView.Direction.DIRECTION_LEFT){
 //                    tv.setText("左");
                     if(x78<=2800){
-                        x78+=5;
-                        data[7]=(byte) (x78>>8);  //横滚高八位
-                        data[8]=(byte) (x78&0xff);//横滚低八位
-                    }
-                    else{
-                        Toast.makeText(MainActivity.this,"您的飞机快要旋转了呀~",Toast.LENGTH_SHORT).show();
+                            x78+=5;
+                            data[7]=(byte) (x78>>8);  //横滚高八位
+                            data[8]=(byte) (x78&0xff);//横滚低八位
+                        }
+                        else{
+                            Toast.makeText(MainActivity.this,"您的飞机快要旋转了呀~",Toast.LENGTH_SHORT).show();
                     }
                     tvshowHengGun.setText("横滚值："+x78);
                 }else if (direction == RockerView.Direction.DIRECTION_UP){
@@ -485,14 +529,54 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //设置界面：
+
     /**设置界面按钮*/
     public  void btnSettings(View view){
-        //设置界面显示与隐藏
-        ConstraintLayout cl=(ConstraintLayout)findViewById(R.id.valueSettings);
-         if(cl.getVisibility()==View.GONE){
-             cl.setVisibility(View.VISIBLE);
-         }else{
-             cl.setVisibility(View.GONE);
-         }
+        fadeToggleSetting();
     }
+
+    /**取消按钮单击事件*/
+    public  void btnCancel(View view){
+        fadeToggleSetting();
+    }
+
+    /**设置界面显示与隐藏*/
+    public void fadeToggleSetting(){
+        ConstraintLayout cl=(ConstraintLayout)findViewById(R.id.valueSettings);
+        if(cl.getVisibility()==View.GONE){
+            cl.setVisibility(View.VISIBLE);
+        }else{
+            cl.setVisibility(View.GONE);
+        }
+    }
+
+    public void addRockValue(View view){
+        setRockValue(true,1);
+    }
+
+    public void setRockValue(boolean isAdd,int value){
+        if(isAdd){
+        if(x78<=2800){
+            x78+=1;
+            data[7]=(byte) (x78>>8);  //横滚高八位
+            data[8]=(byte) (x78&0xff);//横滚低八位
+        }
+        else {
+            Toast.makeText(MainActivity.this, "您的飞机快要旋转了呀~", Toast.LENGTH_SHORT).show();
+        }
+        }
+        else{
+            if(x78>200) {
+                x78-=1;
+                data[7]=(byte) (x78>>8);  //横滚高八位
+                data[8]=(byte) (x78&0xff);//横滚低八位
+
+            }else{
+                Toast.makeText(MainActivity.this,"您的飞机快要旋转了呀~",Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+
 }

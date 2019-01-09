@@ -51,8 +51,8 @@ public class ParameterSettingActivity extends AppCompatActivity {
     }
 
     public void Back(View view){
-        Intent intent =new Intent(ParameterSettingActivity.this,MainActivity.class);
-        startActivity(intent);
+//        Intent intent =new Intent(ParameterSettingActivity.this,MainActivity.class);
+//        startActivity(intent);
 
     }
 

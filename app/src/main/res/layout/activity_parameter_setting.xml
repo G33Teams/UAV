@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ParameterSettingActivity">
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/settting_layout_left"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/settting_layout_center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        >
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/circle_layout_l"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@id/circle_layout_lb"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_weight="3">
+
+            <TextView
+                android:id="@+id/tv_progress_left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="0"
+                android:textSize="24sp"
+                app:layout_constraintBottom_toBottomOf="@id/circle_progress_left"
+                app:layout_constraintLeft_toLeftOf="@id/circle_progress_left"
+                app:layout_constraintRight_toRightOf="@id/circle_progress_left"
+                app:layout_constraintTop_toTopOf="@id/circle_progress_left" />
+
+            <g33.uav.CircleProgressView
+                android:id="@+id/circle_progress_left"
+                android:layout_width="160dp"
+                android:layout_height="160dp"
+                android:layout_marginBottom="36dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+
+                app:layout_constraintRight_toRightOf="parent"
+                app:location_start="top"
+                app:progress_color="#4db849"
+                app:progress_width="10dp" />
+
+            <Button
+                android:id="@+id/btn_jian_l"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:background="@drawable/jian"
+                app:layout_constraintLeft_toLeftOf="@id/circle_progress_left"
+                app:layout_constraintBottom_toBottomOf="parent"
+                />
+
+            <Button
+                android:id="@+id/btn_jia_l"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:background="@drawable/jia"
+                app:layout_constraintRight_toRightOf="@id/circle_progress_left"
+                app:layout_constraintBottom_toBottomOf="parent"
+                 />
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="横滚值"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                 />
+
+
+        </android.support.constraint.ConstraintLayout>
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/circle_layout_lb"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/circle_layout_l"
+            app:layout_constraintVertical_weight="1">
+
+            <Button
+                android:id="@+id/btn_recover"
+                android:layout_width="60dp"
+                android:layout_height="40dp"
+                android:text="恢复"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                />
+        </android.support.constraint.ConstraintLayout>
+
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/settting_layout_center"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintLeft_toRightOf="@id/settting_layout_left"
+        app:layout_constraintRight_toLeftOf="@id/settting_layout_right"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_weight="1">
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/circle_layout_c"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@id/circle_layout_cb"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_weight="3">
+
+            <TextView
+                android:id="@+id/tv_progress_center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="0"
+                android:textSize="24sp"
+                app:layout_constraintBottom_toBottomOf="@id/circle_progress_center"
+                app:layout_constraintLeft_toLeftOf="@id/circle_progress_center"
+                app:layout_constraintRight_toRightOf="@id/circle_progress_center"
+                app:layout_constraintTop_toTopOf="@id/circle_progress_center" />
+
+            <g33.uav.CircleProgressView
+                android:id="@+id/circle_progress_center"
+                android:layout_width="190dp"
+                android:layout_height="190dp"
+                android:layout_marginBottom="36dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:location_start="top"
+                app:progress_color="#eb5b4c"
+                app:progress_width="10dp" />
+
+            <Button
+                android:id="@+id/btn_jian_c"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:background="@drawable/jian"
+                app:layout_constraintLeft_toLeftOf="@id/circle_progress_center"
+                app:layout_constraintBottom_toBottomOf="parent"
+                />
+
+            <Button
+                android:id="@+id/btn_jia_c"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:background="@drawable/jia"
+                app:layout_constraintRight_toRightOf="@id/circle_progress_center"
+                app:layout_constraintBottom_toBottomOf="parent"
+                />
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="航向值"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent" />
+        </android.support.constraint.ConstraintLayout>
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/circle_layout_cb"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/circle_layout_c"
+            app:layout_constraintVertical_weight="1">
+
+            <Button
+                android:id="@+id/btn_save"
+                android:layout_width="80dp"
+                android:layout_height="55dp"
+                android:text="保存"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                />
+        </android.support.constraint.ConstraintLayout>
+
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/settting_layout_right"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintLeft_toRightOf="@id/settting_layout_center"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_weight="1">
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/circle_layout_r"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@id/circle_layout_rb"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_weight="3">
+
+            <TextView
+                android:id="@+id/tv_progress_right"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="0"
+                android:textSize="24sp"
+                app:layout_constraintBottom_toBottomOf="@id/circle_progress_right"
+                app:layout_constraintLeft_toLeftOf="@id/circle_progress_right"
+                app:layout_constraintRight_toRightOf="@id/circle_progress_right"
+                app:layout_constraintTop_toTopOf="@id/circle_progress_right" />
+
+            <g33.uav.CircleProgressView
+                android:id="@+id/circle_progress_right"
+                android:layout_width="160dp"
+                android:layout_height="160dp"
+                android:layout_marginBottom="36dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:location_start="top"
+                app:progress_color="#fcd209"
+                app:progress_width="10dp" />
+
+            <Button
+                android:id="@+id/btn_jian_r"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:background="@drawable/jian"
+                app:layout_constraintLeft_toLeftOf="@id/circle_progress_right"
+                app:layout_constraintBottom_toBottomOf="parent"
+                />
+
+            <Button
+                android:id="@+id/btn_jia_r"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:background="@drawable/jia"
+                app:layout_constraintRight_toRightOf="@id/circle_progress_right"
+                app:layout_constraintBottom_toBottomOf="parent"
+                />
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="俯仰值"
+                android:textAllCaps="false"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent" />
+        </android.support.constraint.ConstraintLayout>
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/circle_layout_rb"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/circle_layout_r"
+            app:layout_constraintVertical_weight="1">
+
+            <Button
+                android:id="@+id/button9"
+                android:layout_width="60dp"
+                android:layout_height="40dp"
+                android:text="取消"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                android:onClick="Back"/>
+        </android.support.constraint.ConstraintLayout>
+
+    </android.support.constraint.ConstraintLayout>
+</android.support.constraint.ConstraintLayout>

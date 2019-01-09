@@ -1,13 +1,14 @@
 package g33.uav;
 
 import android.Manifest;
+import android.animation.LayoutTransition;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.os.Build;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -17,6 +18,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -28,19 +30,68 @@ public class MainActivity extends AppCompatActivity {
     public byte[] data=new byte[34];           //定义通信数组
     public OutputStream out;                   //定义输出流
 
-    /**无人机链接状态*/
+    public int x34=0;       //油门初始值
+    public int x56=1500;    //航向值 中值：1500
+    public int x78=1400;    //横滚值 中值：1500
+    public int x910=1870;   //俯仰值：测试平稳是1870
+
+    /**无人机连接状态*/
     public boolean isOnline=false;
     public boolean isRock=false;
+
     /**无人机操控控制*/
     private SeekBar throttleControl;    //油门控制
+    private TextView tvshowThrottleContorlData;
+    private Button btnConnect;
+    private TextView tvshowHangXiang;
+    private TextView tvshowHengGun;
+    private TextView tvshowFuYang;
+    private TextView tvshowYouMen;
 
-    public void initdata(){
+    /**摇杆是否复位*/
+    public boolean isFinish_yaogan=true;
+
+    /**界面控件初始化*/
+    public void initElements(){
+        btnConnect=(Button)findViewById(R.id.btn_connect);
+        throttleControl = (SeekBar) findViewById(R.id.seekBar);
+        throttleControl.setMax(980);
+        throttleControl.setEnabled(false);
+        tvshowThrottleContorlData=(TextView)findViewById(R.id.tv_showThrottleContorlData);
+        tvshowYouMen=(TextView)findViewById(R.id.textViewYouMen);
+        tvshowYouMen.setText("油门值："+x34);
+
+        tvshowHangXiang=(TextView)findViewById(R.id.textViewHangXiang);
+        tvshowHangXiang.setText("航向值："+x56);
+
+        tvshowHengGun=(TextView)findViewById(R.id.textViewHengGun);
+        tvshowHengGun.setText("横滚值："+x78);
+
+        tvshowFuYang=(TextView)findViewById(R.id.textViewFuYang);
+        tvshowFuYang.setText("俯仰值："+x910);
+
+         initrokerview();
+//        Thread t=new Thread(new ThreadTrokerview());
+//        t.start();
+    }
+
+    public void initData(){
         data[0]=(byte) 0xAA;   //协议固定数据
         data[1]=(byte) 0xC0;   //协议固定数据
         data[2]=(byte) 0x1C;   //协议固定数据
         //设置油门值，控制上下方向
-        data[3]=(byte) (300>>8);  //设置油门的高八位
-        data[4]=(byte) (300&0xff);//设置油门的低八位
+        data[3]=(byte) (x34>>8);  //设置油门的高八位
+        data[4]=(byte) (x34&0xff);//设置油门的低八位
+
+        data[5]=(byte) (x56>>8);  //航向高八位
+        data[6]=(byte) (x56&0xff);//航向低八位
+
+        data[7]=(byte) (x78>>8);  //横滚高八位
+        data[8]=(byte) (x78&0xff);//横滚低八位
+
+        data[9]=(byte) (x910>>8);  //俯仰高八位
+        data[10]=(byte) (x910&0xff);//俯仰低八位
+
         data[31]=(byte) 0x1C;   //协议固定数据
         data[32]=(byte) 0x0D;	//协议固定数据
         data[33]=(byte) 0x0A;	//协议固定数据
@@ -62,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
     //请求状态码
     private static int REQUEST_PERMISSION_CODE = 1;
 
-    public  void getPremissions(){
+    public  void getPermissions(){
         //判断是否有权限
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},REQUEST_PERMISSION_CODE);/* 请求权限 */
@@ -77,14 +128,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        initdata(); //初始化数据
+
+        initData(); //初始化数据
+        getPermissions();
+        initElements();
 
         WebView webView=(WebView)findViewById(R.id.top_center_web);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient());
         //确保跳转到另一个网页时仍然在当前WebView显示
         webView.loadUrl("http://www.baidu.com");
-        getPremissions();
+
     }
 
     public class MyThread implements Runnable{
@@ -107,15 +161,16 @@ public class MainActivity extends AppCompatActivity {
                 //3.3获取socket
                 socket.connect();
                 isOnline=true;
+                //isOnline=socket.isConnected();
                 //3.4 通过socket输出流发送数据
                 out=socket.getOutputStream();//获得输出流
             } catch (IOException e) {                //连接失败
                 e.printStackTrace();
-                isOnline=false;
             }
         }
     }
 
+    /**基础弹窗提示*/
     public void showMessage(String title,String content){
         /* @setIcon 设置对话框图标
          * @setTitle 设置对话框标题
@@ -144,6 +199,9 @@ public class MainActivity extends AppCompatActivity {
         normalDialog.show();
     }
 
+    public void showLoading(){
+
+    }
 
     /**发送数据*/
     public class SendThread implements  Runnable{
@@ -168,58 +226,132 @@ public class MainActivity extends AppCompatActivity {
     public void btnConnect(View view){
         if( isOnline){
             isOnline=false;
-            btnUnConnect();
+            btnConnect.setText("连接");
+//            showMessage("提示","连接已断开！");
+            Toast.makeText(MainActivity.this,"连接已断开!",Toast.LENGTH_SHORT).show();
         }else{
+            Toast.makeText(MainActivity.this,"正在连接无人机,请稍等...",Toast.LENGTH_LONG).show();
             //第四步：启动线程
             Thread t=new Thread(new MyThread());//指定要启动的线程
             t.start();                          //启动
-            if(isOnline)
-                showMessage("提示","连接成功,状态码（"+(isOnline)+"）");
-            else  showMessage("提示","连接失败,状态码（"+(isOnline)+"）");
+            try {
+                t.join();
+                if(isOnline){
+                    btnConnect.setText("断开");
+                    Toast.makeText(MainActivity.this,"无人机连接成功！",Toast.LENGTH_SHORT).show();
+//                    showMessage("提示","连接成功!");
+                }
+                else {
+                    Toast.makeText(MainActivity.this,"无人机连接失败！",Toast.LENGTH_SHORT).show();
+//                    showMessage("提示","连接失败!");
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                showMessage("提示","线程join执行异常："+e.getMessage());
+            }
         }
     }
 
     /**断开连接*/
     public void btnUnConnect(){
-        Button btnC=(Button)findViewById(R.id.btn_connect);
-        btnC.setText("连接");
+        btnConnect.setText("连接");
     }
 
     /**
-     * 加油(飞机连续转动)
+     * 启动
      * */
     public void btnRock(View view){
-        if(isRock){
-            isRock=false;
-            btnStop();
+        if(!isOnline){
+            Toast.makeText(MainActivity.this,"请先连接无人机！",Toast.LENGTH_SHORT).show();
+//            showMessage("提示","请先连接！");
         }else{
-            isRock=true;
-            isOnline=true;
-            Thread t=new Thread(new SendThread());
-            t.start();
-            seekBar_throttleControl();
+            if(isRock){
+                isRock=false;
+                btnStop();
+                Toast.makeText(MainActivity.this,"已停止！",Toast.LENGTH_SHORT).show();
+//                showMessage("提示","已经停止！");
+            }else{
+                    isRock=true;
+                    Thread t=new Thread(new SendThread());
+                    t.start();
+                    throttleControl.setEnabled(true);
+                    seekBar_throttleControl();
+//                    showMessage("提示","启动成功！");
+                    Toast.makeText(MainActivity.this,"启动成功!",Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
     /**停止*/
     public void btnStop(){
-        isOnline=false;
+
 //        Button btnC=(Button)findViewById(R.id.btn_connect);
 //        btnC.setText("恢复");
+    }
+
+
+
+    /**
+     * 按钮 油门控制
+     * @param flag ：true=加油门，false=减油门
+     * */
+    public void btn_throttleContorl(boolean flag){
+        if (isRock)
+        {
+          if(flag){ //加油门
+              if(x34<=980){
+                  x34+=20;
+                  data[3]=(byte) (x34>>8);  //设置油门的高八位
+                  data[4]=(byte) (x34&0xff);//设置油门的低八位
+              }else{
+                  Toast.makeText(MainActivity.this,"油门已经加到最大！",Toast.LENGTH_SHORT).show();
+//                  showMessage("提示","油门已经加到最大!");
+              }
+                //实时显示数据
+              tvshowThrottleContorlData.setText("油门值："+x34);
+              tvshowYouMen.setText("油门值："+x34);
+
+          }else{ //减油门
+              if(x34>=20){
+                  x34-=20;
+                  data[3]=(byte) (x34>>8);  //设置油门的高八位
+                  data[4]=(byte) (x34&0xff);//设置油门的低八位
+              }else{
+                  Toast.makeText(MainActivity.this,"无人机已经熄火了！",Toast.LENGTH_SHORT).show();
+//                  showMessage("油门提示","无人机已经熄火了!");
+              }
+              //实时显示数据
+              tvshowThrottleContorlData.setText("油门值："+x34);
+              tvshowYouMen.setText("油门值："+x34);
+          }
+          throttleControl.setProgress(x34);
+        }
+    }
+
+    /**按钮 油门加速*/
+    public void btn_throttleContorl_add(View view){
+        btn_throttleContorl(true);
+    }
+
+    /**按钮 油门减速*/
+    public void btn_throttleContorl_reduce(View view){
+        btn_throttleContorl(false);
     }
 
     /**拖动控制油门*/
     public void seekBar_throttleControl(){
         if(isRock) {
-            throttleControl = (SeekBar) findViewById(R.id.seekBar);
             throttleControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
                 //拖动条改变时
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    int speed = progress * 20;
-                    data[3] = (byte) (speed >> 8); // 设置油门的高八位
-                    data[4] = (byte) (speed & 0xff);// 设置油门的低八位
+                    x34=progress;
+                    data[3] = (byte) (x34 >> 8); // 设置油门的高八位
+                    data[4] = (byte) (x34 & 0xff);// 设置油门的低八位
+                    //实时显示数据
+                    tvshowThrottleContorlData.setText("油门值："+x34);
+                    tvshowYouMen.setText("油门值："+x34);
                 }
 
                 //拖动开始
@@ -235,5 +367,132 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+
+    /**向前飞*/
+    public void btn_qian(View view){
+        if(x910<2800){
+            x910+=10;
+            data[9]=(byte) (x910>>8);  //俯仰高八位
+            data[10]=(byte) (x910&0xff);//俯仰低八位
+            //TODO：TextView 显示
+            tvshowFuYang.setText("俯仰值："+x910);
+        }
+    }
+
+    /**向后飞*/
+    public void btn_hou(View view){
+        if(x910>50){
+            x910-=10;
+            data[9]=(byte) (x910>>8);  //俯仰高八位
+            data[10]=(byte) (x910&0xff);//俯仰低八位
+            //TODO：TextView 显示
+            tvshowFuYang.setText("俯仰值："+x910);
+        }
+    }
+
+    /**左旋转*/
+    public void btn_leftRotate(View view){
+        if(x56<=2800){
+            x56+=10;
+            data[5]=(byte) (x56>>8);  //航向高八位
+            data[6]=(byte) (x56&0xff);//航向低八位
+        }else{
+            Toast.makeText(MainActivity.this,"您的飞机要逆时针自转了呀~",Toast.LENGTH_SHORT).show();
+        }
+        tvshowHangXiang.setText(x56);
+    }
+
+    /**右旋转*/
+    public void btn_rightRotate(View view){
+        if(x56>=200){
+            x56-=10;
+            data[5]=(byte) (x56>>8);  //航向高八位
+            data[6]=(byte) (x56&0xff);//航向低八位
+        }else{
+            Toast.makeText(MainActivity.this,"您的飞机要顺时针自转了呀~",Toast.LENGTH_SHORT).show();
+        }
+        tvshowHangXiang.setText(x56);
+    }
+
+
+    /**摇杆*/
+    public void initrokerview(){
+        //找到RockerView控件
+        RockerView roker=(RockerView) findViewById(R.id.yaogan);
+        //实时监测摇动方向
+        roker.setOnShakeListener(RockerView.DirectionMode.DIRECTION_8, new RockerView.OnShakeListener() {
+            //开始摇动时要执行的代码写在本方法里
+            @Override
+            public void onStart() {
+
+            }
+            //结束摇动时要执行的代码写在本方法里
+            @Override
+            public void onFinish() {
+                Toast.makeText(MainActivity.this, "已复位", Toast.LENGTH_SHORT).show();
+            }
+            //摇动方向时要执行的代码写在本方法里
+            @Override
+            public void direction(RockerView.Direction direction) {
+                if (direction == RockerView.Direction.DIRECTION_CENTER){
+//                    tv.setText("中心");
+                }else if (direction == RockerView.Direction.DIRECTION_DOWN){
+//                    tv.setText("下");
+                }else if (direction == RockerView.Direction.DIRECTION_LEFT){
+//                    tv.setText("左");
+                    if(x78<=2800){
+                        x78+=5;
+                        data[7]=(byte) (x78>>8);  //横滚高八位
+                        data[8]=(byte) (x78&0xff);//横滚低八位
+                    }
+                    else{
+                        Toast.makeText(MainActivity.this,"您的飞机快要旋转了呀~",Toast.LENGTH_SHORT).show();
+                    }
+                    tvshowHengGun.setText("横滚值："+x78);
+                }else if (direction == RockerView.Direction.DIRECTION_UP){
+//                    tv.setText("上");
+                }else if (direction == RockerView.Direction.DIRECTION_RIGHT){
+//                    tv.setText("右");
+                    if(x78>200) {
+                        x78-=5;
+                        data[7]=(byte) (x78>>8);  //横滚高八位
+                        data[8]=(byte) (x78&0xff);//横滚低八位
+
+                    }else{
+                        Toast.makeText(MainActivity.this,"您的飞机快要旋转了呀~",Toast.LENGTH_SHORT).show();
+                    }
+                    tvshowHengGun.setText("横滚值："+x78);
+                }else if (direction == RockerView.Direction.DIRECTION_DOWN_LEFT){
+//                    tv.setText("左下");
+                }else if (direction == RockerView.Direction.DIRECTION_DOWN_RIGHT){
+//                    tv.setText("右下");
+                }else if (direction == RockerView.Direction.DIRECTION_UP_LEFT){
+//                    tv.setText("左上");
+                }else if (direction == RockerView.Direction.DIRECTION_UP_RIGHT){
+//                    tv.setText("右上");
+                }
+            }
+        });
+    }
+
+    public class ThreadTrokerview implements Runnable{
+
+        @Override
+        public void run() {
+            initrokerview();
+        }
+    }
+
+    /**设置界面按钮*/
+    public  void btnSettings(View view){
+        //设置界面显示与隐藏
+        ConstraintLayout cl=(ConstraintLayout)findViewById(R.id.valueSettings);
+         if(cl.getVisibility()==View.GONE){
+             cl.setVisibility(View.VISIBLE);
+         }else{
+             cl.setVisibility(View.GONE);
+         }
     }
 }

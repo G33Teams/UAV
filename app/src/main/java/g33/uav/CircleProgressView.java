@@ -95,7 +95,7 @@ public class CircleProgressView extends View {
         canvas.drawArc(rectF, 0, 360, false, mBgPaint);
 
         //绘制当前进度
-        float sweepAngle = 360 * mCurrent / 100;
+        float sweepAngle = 360 * mCurrent / 3000;
         canvas.drawArc(rectF, startAngle, sweepAngle, false, mProgressPaint);
     }
 

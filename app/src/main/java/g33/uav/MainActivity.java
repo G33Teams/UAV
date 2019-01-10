@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.ActivityCompat;
@@ -57,6 +58,9 @@ public class MainActivity extends AppCompatActivity {
     private CircleProgressView circle_progress_left,circle_progress_center,circle_progress_right;
     private TextView tv_progress_left,tv_progress_center,tv_progress_right;
 
+    /**数据操作*/
+    public SharedPreferences sp;        //定义SharedPreferences（用于保存数据）
+
 
     /**界面控件初始化*/
     public void initElements(){
@@ -69,13 +73,13 @@ public class MainActivity extends AppCompatActivity {
         tvshowYouMen.setText("油门值："+x34);
 
         tvshowHangXiang=(TextView)findViewById(R.id.textViewHangXiang);
-        tvshowHangXiang.setText("航向值："+x56);
+//        tvshowHangXiang.setText("航向值："+x56);
 
         tvshowHengGun=(TextView)findViewById(R.id.textViewHengGun);
-        tvshowHengGun.setText("横滚值："+x78);
+//        tvshowHengGun.setText("横滚值："+x78);
 
         tvshowFuYang=(TextView)findViewById(R.id.textViewFuYang);
-        tvshowFuYang.setText("俯仰值："+x910);
+//        tvshowFuYang.setText("俯仰值："+x910);
         roker=(RockerView) findViewById(R.id.yaogan);
         initRokerview();
         initCircleProgress();
@@ -114,7 +118,30 @@ public class MainActivity extends AppCompatActivity {
 //        });
     }
 
+
+    /**保存数据*/
+    public void btn_saveSharedData(View view){
+        SharedPreferences.Editor spe = sp.edit();
+        spe.putInt("x56", x56);
+        spe.putInt("x78", x78);
+        spe.putInt("x910", x910);
+        spe.commit();
+        Toast.makeText(MainActivity.this,"参数保存成功！",Toast.LENGTH_SHORT).show();
+    }
+
+
     public void initData(){
+        sp = getSharedPreferences("flydatas", MODE_PRIVATE);//参数1为给保存数据的文件命名。
+
+        if(sp!=null){
+            x56 = sp.getInt("x56", 0) == 0? 1500 : sp.getInt("x56", 0);
+            x78 = sp.getInt("x78", 0) == 0? 1570 : sp.getInt("x78", 0);
+            x910 = sp.getInt("x910", 0) == 0? 1890 : sp.getInt("x910", 0);
+            tvshowHangXiang.setText("航向值："+x56);
+            tvshowHengGun.setText("横滚值："+x78);
+            tvshowFuYang.setText("俯仰值："+x910);
+        }
+
         data[0]=(byte) 0xAA;   //协议固定数据
         data[1]=(byte) 0xC0;   //协议固定数据
         data[2]=(byte) 0x1C;   //协议固定数据
@@ -168,15 +195,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initData(); //初始化数据
         getPermissions();
         initElements();
+        initData(); //初始化数据
 
-        WebView webView=(WebView)findViewById(R.id.top_center_web);
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.setWebViewClient(new WebViewClient());
-        //确保跳转到另一个网页时仍然在当前WebView显示
-        webView.loadUrl("http://www.baidu.com");
+//        WebView webView=(WebView)findViewById(R.id.top_center_web);
+//        webView.getSettings().setJavaScriptEnabled(true);
+//        webView.setWebViewClient(new WebViewClient());
+//        //确保跳转到另一个网页时仍然在当前WebView显示
+//        webView.loadUrl("http://www.baidu.com");
 
     }
 
@@ -265,16 +292,20 @@ public class MainActivity extends AppCompatActivity {
     public void btnConnect(View view){
         if( isOnline){
             isOnline=false;
+            isRock=false;
             btnConnect.setText("连接");
 //            showMessage("提示","连接已断开！");
+            x34=0;
+            tvshowThrottleContorlData.setText("油门值："+x34);
+            tvshowYouMen.setText("油门值："+x34);
             Toast.makeText(MainActivity.this,"连接已断开!",Toast.LENGTH_SHORT).show();
         }else{
             Toast.makeText(MainActivity.this,"正在连接无人机,请稍等...",Toast.LENGTH_LONG).show();
             //第四步：启动线程
             Thread t=new Thread(new MyThread());//指定要启动的线程
             t.start();                          //启动
-//            try {
-//                t.join();
+            try {
+                t.join();
                 if(isOnline){
                     btnConnect.setText("断开");
                     Toast.makeText(MainActivity.this,"无人机连接成功！",Toast.LENGTH_SHORT).show();
@@ -284,15 +315,16 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this,"无人机连接失败！",Toast.LENGTH_SHORT).show();
 //                    showMessage("提示","连接失败!");
                 }
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//                showMessage("提示","线程join执行异常："+e.getMessage());
-//            }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                showMessage("提示","线程join执行异常："+e.getMessage());
+            }
         }
     }
 
     /**断开连接*/
     public void btnUnConnect(){
+        //TODO:
         btnConnect.setText("连接");
     }
 
@@ -309,6 +341,7 @@ public class MainActivity extends AppCompatActivity {
                 btnStop();
                 Toast.makeText(MainActivity.this,"已停止！",Toast.LENGTH_SHORT).show();
 //                showMessage("提示","已经停止！");
+
             }else{
                     isRock=true;
                     Thread t=new Thread(new SendThread());
@@ -411,48 +444,24 @@ public class MainActivity extends AppCompatActivity {
 
     /**向前飞*/
     public void btn_qian(View view){
-        if(x910<2800){
-            x910+=10;
-            data[9]=(byte) (x910>>8);  //俯仰高八位
-            data[10]=(byte) (x910&0xff);//俯仰低八位
-            //TODO：TextView 显示
-            tvshowFuYang.setText("俯仰值："+x910);
-        }
+      forwardFly(10);
     }
 
     /**向后飞*/
     public void btn_hou(View view){
-        if(x910>50){
-            x910-=10;
-            data[9]=(byte) (x910>>8);  //俯仰高八位
-            data[10]=(byte) (x910&0xff);//俯仰低八位
-            //TODO：TextView 显示
-            tvshowFuYang.setText("俯仰值："+x910);
-        }
+       backFly(10);
     }
+
+
 
     /**左旋转*/
     public void btn_leftRotate(View view){
-        if(x56<=2800){
-            x56+=10;
-            data[5]=(byte) (x56>>8);  //航向高八位
-            data[6]=(byte) (x56&0xff);//航向低八位
-        }else{
-            Toast.makeText(MainActivity.this,"您的飞机要逆时针自转了呀~",Toast.LENGTH_SHORT).show();
-        }
-        tvshowHangXiang.setText(x56);
+      leftRotate(10);
     }
 
     /**右旋转*/
     public void btn_rightRotate(View view){
-        if(x56>=200){
-            x56-=10;
-            data[5]=(byte) (x56>>8);  //航向高八位
-            data[6]=(byte) (x56&0xff);//航向低八位
-        }else{
-            Toast.makeText(MainActivity.this,"您的飞机要顺时针自转了呀~",Toast.LENGTH_SHORT).show();
-        }
-        tvshowHangXiang.setText(x56);
+        RightRotate(10);
     }
 
 
@@ -477,33 +486,31 @@ public class MainActivity extends AppCompatActivity {
             public void direction(RockerView.Direction direction) {
                 if (direction == RockerView.Direction.DIRECTION_CENTER){
 //                    tv.setText("中心");
-                    leftFly();
+
                 }else if (direction == RockerView.Direction.DIRECTION_DOWN){
 //                    tv.setText("下");
-                    leftFly();
-                    System.out.printf("下！~~~~~");
-                    Log.i("flag", "向下！！！！！！！！！！！");
+                    backFly(5);
                 }else if (direction == RockerView.Direction.DIRECTION_LEFT){
 //                    tv.setText("左");
-                    leftFly();
+                    leftFly(2);
                 }else if (direction == RockerView.Direction.DIRECTION_UP){
 //                    tv.setText("上");
-                    leftFly();
+                    forwardFly(5);
                 }else if (direction == RockerView.Direction.DIRECTION_RIGHT){
 //                    tv.setText("右");
-                    leftFly();
+                    rightFly(2);
                 }else if (direction == RockerView.Direction.DIRECTION_DOWN_LEFT){
 //                    tv.setText("左下");
-                    leftFly();
+
                 }else if (direction == RockerView.Direction.DIRECTION_DOWN_RIGHT){
 //                    tv.setText("右下");
-                    leftFly();
+
                 }else if (direction == RockerView.Direction.DIRECTION_UP_LEFT){
 //                    tv.setText("左上");
-                    leftFly();
+
                 }else if (direction == RockerView.Direction.DIRECTION_UP_RIGHT){
 //                    tv.setText("右上");
-                    leftFly();
+
                 }
             }
         });
@@ -517,9 +524,32 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void  leftFly(){
+    /**前倾*/
+    public void  forwardFly(int value){
+        if(x910<2800){
+            x910+=value;
+            data[9]=(byte) (x910>>8);  //俯仰高八位
+            data[10]=(byte) (x910&0xff);//俯仰低八位
+            //TODO：TextView 显示
+            tvshowFuYang.setText("俯仰值："+x910);
+        }
+    }
+
+    /**后仰*/
+    public void backFly(int value){
+        if(x910>50){
+            x910-=value;
+            data[9]=(byte) (x910>>8);  //俯仰高八位
+            data[10]=(byte) (x910&0xff);//俯仰低八位
+            //TODO：TextView 显示
+            tvshowFuYang.setText("俯仰值："+x910);
+        }
+    }
+
+    /**左飞*/
+    public void  leftFly(int value){
         if(x78<=2800){
-            x78+=1;
+            x78+=value;
             data[7]=(byte) (x78>>8);  //横滚高八位
             data[8]=(byte) (x78&0xff);//横滚低八位
         }
@@ -528,9 +558,11 @@ public class MainActivity extends AppCompatActivity {
         }
         tvshowHengGun.setText("横滚值："+x78);
     }
-    public void  rightFly(){
+
+    /**右飞*/
+    public void  rightFly(int value){
         if(x78>200) {
-            x78-=5;
+            x78-=value;
             data[7]=(byte) (x78>>8);  //横滚高八位
             data[8]=(byte) (x78&0xff);//横滚低八位
 
@@ -539,6 +571,31 @@ public class MainActivity extends AppCompatActivity {
         }
         tvshowHengGun.setText("横滚值："+x78);
     }
+
+    /**设置左旋转*/
+    public void leftRotate(int value){
+        if(x56<=2800){
+            x56+=value;
+            data[5]=(byte) (x56>>8);  //航向高八位
+            data[6]=(byte) (x56&0xff);//航向低八位
+        }else{
+            Toast.makeText(MainActivity.this,"您的飞机要逆时针自转了呀~",Toast.LENGTH_SHORT).show();
+        }
+        tvshowHangXiang.setText("航向值："+x56);
+    }
+
+    /**设置右旋转*/
+    public void RightRotate(int value){
+        if(x56>=200){
+            x56-=value;
+            data[5]=(byte) (x56>>8);  //航向高八位
+            data[6]=(byte) (x56&0xff);//航向低八位
+        }else{
+            Toast.makeText(MainActivity.this,"您的飞机要顺时针自转了呀~",Toast.LENGTH_SHORT).show();
+        }
+        tvshowHangXiang.setText("航向值："+x56);
+    }
+
     //设置界面：
 
     /**设置界面按钮*/
@@ -546,6 +603,8 @@ public class MainActivity extends AppCompatActivity {
         fadeToggleSetting();
         settingProgress();
     }
+
+    /**设置界面写入进度条*/
     public void settingProgress(){
         //开锁执行动画效果
         circle_progress_left.startAnimProgress(x78, 0);
@@ -571,55 +630,81 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void btnRecover(View view){
+        x56=1500;
+        x78=1500;
+        x910=1500;
+        settingProgress();
+        tvshowHangXiang.setText("航向值："+x56);
+        tvshowHengGun.setText("横滚值："+x78);
+        tvshowFuYang.setText("俯仰值："+x910);
+        Toast.makeText(MainActivity.this,"恢复完毕!",Toast.LENGTH_SHORT).show();
+    }
+
+    /**微调增加横滚值*/
     public void addRockValue(View view){
-        setRockValue(true);
+        setRockValue(true,1);
     }
 
+    /**微调减少横滚值*/
     public  void subtractRockValue(View view){
-        setRockValue(false);
+        setRockValue(false,1);
     }
 
-    public void setRockValue(boolean isAdd){
-        if(isAdd){
-        if(x78<=2800){
-            x78+=1;
-            data[7]=(byte) (x78>>8);  //横滚高八位
-            data[8]=(byte) (x78&0xff);//横滚低八位
-            circle_progress_left.startAnimProgress(x78, 0);
-            tv_progress_left.setText(String.valueOf(x78));
-        }
-        else {
-            Toast.makeText(MainActivity.this, "您的飞机快要旋转了呀~", Toast.LENGTH_SHORT).show();
-        }
-        }
-        else{
-            if(x78>200) {
-                x78-=1;
-                data[7]=(byte) (x78>>8);  //横滚高八位
-                data[8]=(byte) (x78&0xff);//横滚低八位
-                circle_progress_left.startAnimProgress(x78, 0);
-                tv_progress_left.setText(String.valueOf(x78));
-            }else{
-                Toast.makeText(MainActivity.this,"您的飞机快要旋转了呀~",Toast.LENGTH_SHORT).show();
-            }
-        }
+    /**微调增加俯角值*/
+    public  void addPitchValue(View view){
+        setPitchValue(true,1);
     }
 
-    public  void setPitchValue(boolean isAdd){
+    /**微调减少俯角值*/
+    public  void  subtractPitchValue(View view){
+        setPitchValue(false,1);
+    }
+
+    /**微调增加航向值*/
+    public  void addCourseValue(View view){
+        setCourseValue(true,1);
+    }
+
+    /**微调减少航向值*/
+    public  void  subtractCourseValue(View view){
+        setCourseValue(false,1);
+    }
+
+
+
+    /**写入横滚值*/
+    public void setRockValue(boolean isAdd,int value){
         if(isAdd){
-            if(x910<2800){
-                x910+=10;
-                tvshowFuYang.setText("俯仰值："+x910);
-            }
+                leftFly(value);
+          }
+            else{
+            rightFly(value);
+        }
+        circle_progress_left.startAnimProgress(x78, 0);
+        tv_progress_left.setText(String.valueOf(x78));
+    }
+
+    /**写入俯仰值*/
+    public  void setPitchValue(boolean isAdd,int value){
+        if(isAdd){
+                forwardFly(value);
         }else{
-            if(x910>50){
-                x910-=10;
-                data[9]=(byte) (x910>>8);  //俯仰高八位
-                data[10]=(byte) (x910&0xff);//俯仰低八位
-                tvshowFuYang.setText("俯仰值："+x910);
-            }
+                backFly(value);
         }
+        circle_progress_right.startAnimProgress(x910, 0);
+        tv_progress_right.setText(String.valueOf(x910));
+    }
 
+    /**写入航向值*/
+    public  void  setCourseValue(boolean isAdd,int value){
+        if(isAdd){
+                leftRotate(1);
+        }else{
+                 RightRotate(1);
+        }
+        circle_progress_center.startAnimProgress(x56, 0);
+        tv_progress_center.setText(String.valueOf(x56));
     }
 
 

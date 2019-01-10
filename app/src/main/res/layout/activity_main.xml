@@ -447,6 +447,7 @@
                         android:layout_width="45dp"
                         android:layout_height="45dp"
                         android:background="@drawable/jian"
+                        android:onClick="subtractRockValue"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintLeft_toLeftOf="@id/circle_progress_left" />
 
@@ -486,6 +487,7 @@
                         android:layout_width="60dp"
                         android:layout_height="40dp"
                         android:text="恢复"
+                        android:onClick="btnRecover"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintRight_toRightOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -543,6 +545,7 @@
                         android:layout_width="45dp"
                         android:layout_height="45dp"
                         android:background="@drawable/jian"
+                        android:onClick="subtractCourseValue"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintLeft_toLeftOf="@id/circle_progress_center" />
 
@@ -551,6 +554,7 @@
                         android:layout_width="45dp"
                         android:layout_height="45dp"
                         android:background="@drawable/jia"
+                        android:onClick="addCourseValue"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintRight_toRightOf="@id/circle_progress_center" />
 
@@ -579,6 +583,7 @@
                         android:layout_width="80dp"
                         android:layout_height="55dp"
                         android:text="保存"
+                        android:onClick="btn_saveSharedData"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintRight_toRightOf="parent"
@@ -636,6 +641,7 @@
                         android:layout_width="45dp"
                         android:layout_height="45dp"
                         android:background="@drawable/jian"
+                        android:onClick="subtractPitchValue"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintLeft_toLeftOf="@id/circle_progress_right" />
 
@@ -644,6 +650,7 @@
                         android:layout_width="45dp"
                         android:layout_height="45dp"
                         android:background="@drawable/jia"
+                        android:onClick="addPitchValue"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintRight_toRightOf="@id/circle_progress_right" />
 
@@ -673,7 +680,7 @@
                         android:layout_width="60dp"
                         android:layout_height="40dp"
                         android:onClick="btnCancel"
-                        android:text="取消"
+                        android:text="返回"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
